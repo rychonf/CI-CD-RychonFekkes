@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: htmx-spring-boot-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: htmx-spring-boot
+  template:
+    metadata:
+      labels:
+        app: htmx-spring-boot
+    spec:
+      containers:
+        - name: htmx-spring-boot
+          image: registry.digitalocean.com/cicdrych/htmx-spring-boot:1
+          ports:
+            - containerPort: 3030
