@@ -16,4 +16,4 @@ spec:
         - name: htmx-spring-boot
           image: registry.digitalocean.com/cicdrych/htmx-spring-boot:1
           ports:
-            - containerPort: 3030
+            - containerPort: 8080
