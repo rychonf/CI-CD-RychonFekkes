@@ -11,6 +11,17 @@
             <artifactId>spring-boot-maven-plugin</artifactId>
           </plugin>
         </plugins>
+
+<!--        <resources>-->
+<!--            <resource>-->
+<!--                <directory>src/main/resources</directory>-->
+<!--                <includes>-->
+<!--                    <include>/*.properties</include>-->
+<!--                    <include>/.xml</include>-->
+<!--                    <include>assets/*</include> &lt;!&ndash; Include assets folder &ndash;&gt;-->
+<!--                </includes>-->
+<!--            </resource>-->
+<!--        </resources>-->
     </build>
 
     <description>htmx + Spring Boot Demo</description>
