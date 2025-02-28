@@ -46,6 +46,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install doctl if not present
+        run: |
+          if ! command -v doctl &> /dev/null; then
+            echo "doctl niet gevonden. Installeren..."
+            curl -L https://github.com/digitalocean/doctl/releases/download/v1.87.0/doctl-1.87.0-linux-amd64.tar.gz -o doctl.tar.gz
+            tar xzf doctl.tar.gz
+            sudo mv doctl /usr/local/bin/
+          else
+            echo "doctl is al geïnstalleerd. Installatie overslaan."
+          fi
+          
+      - name: Authenticate doctl
+        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
       - name: Create .kube directory
         run: |
           KUBE_DIR=$HOME/.kube
@@ -69,9 +83,12 @@ jobs:
             echo "kubectl is al geïnstalleerd"
           fi
 
+      - name: update image
+        run: |
+          IMAGE_NAME=registry.digitalocean.com/cicdrych/springboot-school-project:latest          
+          sed -i "s|image: .*|image: $IMAGE_NAME|g" kubernetes/deployment.yaml
+
       - name: Deploy to Kubernetes
         run: |
-          IMAGE_NAME=registry.digitalocean.com/cicdrych/springboot-school-project:latest
-          sed -i "s|image: .*|image: $IMAGE_NAME|g" kubernetes/deployment.yaml
           kubectl apply -f kubernetes/deployment.yaml
           kubectl rollout status deployment/springboot-school-project-deployment
