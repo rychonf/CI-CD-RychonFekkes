@@ -46,7 +46,7 @@ RUN mkdir -p /app/logs && chmod -R 777 /app/logs
 RUN apk update && apk add --no-cache \
     libssl3 curl ca-certificates
 
-# Expose application port
+# Expose applicatie poort
 EXPOSE 8080
 
 # Run the application
