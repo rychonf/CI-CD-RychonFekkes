@@ -15,7 +15,7 @@ COPY pom.xml mvnw ./
 COPY .mvn .mvn
 
 # Download dependencies before copying source code to leverage Docker caching
-RUN mvn dependency:go-offline
+#RUN mvn dependency:go-offline
 
 # Kopieert de broncode van de applicatie
 COPY src ./src
