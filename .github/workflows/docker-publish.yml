@@ -27,30 +27,51 @@ jobs:
 
       - name: Build Docker image with Podman
         run: |
-          podman build -t localhost/htmx-spring-boot:1 .
+          podman build -t springboot-school-project:1 .
 
       - name: Tag image for DigitalOcean Container Registry
         run: |
-          podman tag localhost/htmx-spring-boot:1 registry.digitalocean.com/cicdrych/htmx-spring-boot:1
+          podman tag localhost/springboot-school-project:1 registry.digitalocean.com/cicdrych/springboot-school-project:1
 
       - name: Push Docker image to DigitalOcean Container Registry
         run: |
-          podman push registry.digitalocean.com/cicdrych/htmx-spring-boot:1
+          podman push registry.digitalocean.com/cicdrych/springboot-school-project:1
 
   # Job 2: Deploy naar Kubernetes
   deploy:
     runs-on: ubuntu-latest
     needs: build  # Zorgt ervoor dat de deploy job alleen draait als de build job slaagt
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          kubeconfig: ${{ secrets.KUBECONFIG }}
-
-      - name: Deploy naar Kubernetes
+      - name: Create .kube directory
         run: |
+          KUBE_DIR=$HOME/.kube
+          if [ ! -d "$KUBE_DIR" ]; then
+            mkdir -p $KUBE_DIR
+          else
+            echo "$KUBE_DIR bestaat al"
+          fi
+
+      - name: Set KUBECONFIG
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+
+      - name: Install kubectl
+        run: |
+          if ! command -v kubectl &> /dev/null; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x ./kubectl
+            sudo mv ./kubectl /usr/local/bin/kubectl
+          else
+            echo "kubectl is al geïnstalleerd"
+          fi
+
+      - name: Deploy to Kubernetes
+        run: |
+          IMAGE_NAME=registry.digitalocean.com/cicdrych/springboot-school-project:latest
+          sed -i "s|image: .*|image: $IMAGE_NAME|g" kubernetes/deployment.yaml
           kubectl apply -f kubernetes/deployment.yaml
-          kubectl rollout status deployment/htmx-spring-boot-deployment
+          kubectl rollout status deployment/springboot-school-project-deployment
