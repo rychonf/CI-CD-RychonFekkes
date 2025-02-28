@@ -4,7 +4,7 @@ FROM maven:3.8.4-eclipse-temurin-17 AS builder
 # Set de working directory
 WORKDIR /app
 
-# Omgevingsvariabelen instellen voor betere controle
+# Omgevingsvariabelen instellen voor betere controles
 # Dit versnelt de built en verbruikt minder CPU
 ENV MAVEN_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 
