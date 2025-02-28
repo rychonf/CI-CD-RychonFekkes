@@ -1,5 +1,5 @@
 # Stage 1: Bouwt de Spring Boot applicatie
-FROM eclipse-temurin:17-jre AS builder
+FROM maven:3.8.4-eclipse-temurin-17 AS builder
 
 # Set de working directory
 WORKDIR /app
@@ -15,7 +15,7 @@ COPY pom.xml mvnw ./
 COPY .mvn .mvn
 
 # Download dependencies before copying source code to leverage Docker caching
-#RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline
 
 # Kopieert de broncode van de applicatie
 COPY src ./src
@@ -24,7 +24,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Create a minimal runtime environment
-FROM adoptopenjdk:17-jre-slim
+FROM gcr.io/distroless/java17-debian11:latest
 
 # Set working directory
 WORKDIR /app
