@@ -19,7 +19,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Create a minimal runtime environment
-FROM gcr.io/distroless/base:latest
+FROM adoptopenjdk:17-jre-slim
 
 # Set working directory
 WORKDIR /app
@@ -29,6 +29,8 @@ COPY --from=builder /app/target/*.jar app.jar
 
 # Use a non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Switch to non-root user
 USER appuser
 
 # Expose application port
