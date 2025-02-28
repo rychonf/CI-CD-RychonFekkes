@@ -89,7 +89,7 @@ jobs:
 
       - name: update image
         run: |
-          IMAGE_NAME=registry.digitalocean.com/cicdrych/htmx-spring-boot:latest          
+          IMAGE_NAME=registry.digitalocean.com/cicdrych/htmx-spring-boot:1          
           sed -i "s|image: .*|image: $IMAGE_NAME|g" kubernetes/deployment.yaml
 
       - name: Deploy to Kubernetes
