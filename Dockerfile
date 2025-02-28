@@ -43,9 +43,8 @@ ENV SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/mydatabase \
 RUN mkdir -p /app/logs && chmod -R 777 /app/logs
 
  #Systeempakketten installeren en opruimen (LibSSL3 en curl)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl3 curl ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk update && apk add --no-cache \
+    libssl3 curl ca-certificates
 
 # Expose application port
 EXPOSE 8080
