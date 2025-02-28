@@ -19,7 +19,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Create a minimal runtime environment
-FROM gcr.io/distroless/java17-debian11:latest
+FROM gcr.io/distroless/base:latest
 
 # Set working directory
 WORKDIR /app
