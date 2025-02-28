@@ -1,18 +1,23 @@
-# Stage 1: Build the Spring Boot application
-FROM maven:3.8.4-openjdk-17-slim AS builder
+# Stage 1: Bouwt de Spring Boot applicatie
+FROM eclipse-temurin:17-jre AS builder
 
-# Set working directory
+# Set de working directory
 WORKDIR /app
 
-# Copy Maven files separately for better caching
-COPY pom.xml .
-COPY mvnw .
+# Omgevingsvariabelen instellen voor betere controle
+# Dit versnelt de built en verbruikt minder CPU
+ENV MAVEN_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+
+# Kopieeren van bestanden naar de container image
+# Kopieert de maven configuratie bestanden voor gebruik van caching
+COPY pom.xml mvnw ./
+# Kopieert de map waar de maven wrapper zich bevind
 COPY .mvn .mvn
 
 # Download dependencies before copying source code to leverage Docker caching
 RUN mvn dependency:go-offline
 
-# Copy application source code
+# Kopieert de broncode van de applicatie
 COPY src ./src
 
 # Build the Spring Boot application
@@ -27,14 +32,23 @@ WORKDIR /app
 # Copy the built JAR from the builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Use a non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Omgevingsvariabelen instellen voor databaseconfiguratie en logging
+ENV SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/mydatabase \
+    SPRING_DATASOURCE_USERNAME=root \
+    SPRING_DATASOURCE_PASSWORD=securepassword \
+    LOGGING_LEVEL_ROOT=INFO \
+    LOGGING_FILE_NAME=/app/logs/app.log
 
-# Switch to non-root user
-USER appuser
+# Zorg ervoor dat de logs directory bestaat en rechten juist zijn ingesteld
+RUN mkdir -p /app/logs && chmod -R 777 /app/logs
+
+ #Systeempakketten installeren en opruimen (LibSSL3 en curl)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl3 curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 # Expose application port
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar", "--logging.file.name=/app/logs/app.log"]
