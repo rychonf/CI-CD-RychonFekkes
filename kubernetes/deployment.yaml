@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: htmx-spring-boot-deployment
+  name: htmx-spring-boot
   namespace: default
 spec:
   progressDeadlineSeconds: 600
@@ -15,18 +15,10 @@ spec:
         app: htmx-spring-boot
     spec:
       imagePullSecrets:
-        - name: digitalocean-registry-secret
-      volumes:
-        - name: registry-secret-volume
-          secret:
-            secretName: digitalocean-registry-secret
+        - name: registry-cicdrych
       containers:
         - name: htmx-spring-boot
           image: registry.digitalocean.com/cicdrych/htmx-spring-boot:1
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
-          volumeMounts:
-            - name: registry-secret-volume
-              mountPath: /kan/docker-config
-              subPath: config.json
