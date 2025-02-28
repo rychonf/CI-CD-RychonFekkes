@@ -1,41 +1,38 @@
-# Stage 1: Build the application
-# Gebruik een specifieke Maven-versie en een minimalistische OpenJDK 17 image
+# Stage 1: Build the Spring Boot application
 FROM maven:3.8.4-openjdk-17-slim AS builder
 
-# Werkdirectory instellen
+# Set working directory
 WORKDIR /app
 
-# Omgevingsvariabelen instellen (indien nodig voor build)
-ENV MAVEN_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+# Copy Maven files separately for better caching
+COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
 
-# Minimaliseer lagen door in één stap dependencies te installeren en de code te kopiëren
-COPY pom.xml ./
+# Download dependencies before copying source code to leverage Docker caching
 RUN mvn dependency:go-offline
 
-# Kopieer de rest van de broncode
+# Copy application source code
 COPY src ./src
-COPY src/main/resources/static/assets ./assets
 
-# Bouw de applicatie, waarbij tests worden overgeslagen om de buildtijd te verkorten
+# Build the Spring Boot application
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the application
-# Gebruik een lichtgewicht productiebase image
-FROM gcr.io/distroless/java17-debian11 AS runtime
+# Stage 2: Create a minimal runtime environment
+FROM gcr.io/distroless/java17-debian11:latest
 
-# Werkdirectory instellen
+# Set working directory
 WORKDIR /app
 
-# Kopieer het jar-bestand uit de builder stage
+# Copy the built JAR from the builder stage
 COPY --from=builder /app/target/*.jar app.jar
-COPY --from=builder /app/assets ./assets
 
-# Voeg een niet-root gebruiker toe voor betere beveiliging
+# Use a non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 USER appuser
 
-# Exposeer de poort waarop de applicatie draait
-EXPOSE 3030
+# Expose application port
+EXPOSE 8080
 
-# Start de applicatie
+# Run the application
 CMD ["java", "-jar", "app.jar"]
