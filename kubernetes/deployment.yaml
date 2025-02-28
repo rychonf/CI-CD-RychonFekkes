@@ -16,9 +16,17 @@ spec:
     spec:
       imagePullSecrets:
         - name: digitalocean-registry-secret
+      volumes:
+        - name: registry-secret-volume
+          secret:
+            secretName: digitalocean-registry-secret
       containers:
         - name: htmx-spring-boot
           image: registry.digitalocean.com/cicdrych/htmx-spring-boot:1
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          volumeMounts:
+            - name: registry-secret-volume
+              mountPath: /kan/docker-config
+              subPath: config.json
