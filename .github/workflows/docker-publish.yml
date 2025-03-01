@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  # Job 1: Build en Push naar DigitalOcean Registrys
+  # Job 1: Build en Push naar DigitalOcean Register
   build:
     runs-on: ubuntu-latest
 
@@ -23,7 +23,8 @@ jobs:
           sudo apt-get install -y podman
 
       - name: Log in to DigitalOcean Container Registry
-        run: podman login registry.digitalocean.com -u ${{ secrets.DIGITALOCEAN_USERNAME }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username ${{ secrets.DIGITALOCEAN_USERNAME }} --password-stdin
 
       - name: Build Docker image with Podman
         run: |
@@ -75,7 +76,7 @@ jobs:
 
       - name: Set KUBECONFIG
         run: |
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config | base64 --decode > kubeconfig
 
       - name: Install kubectl
         run: |
@@ -95,4 +96,4 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f kubernetes/deployment.yaml
-          kubectl rollout status deployment/htmx-spring-boot
+#          kubectl rollout status deployment/htmx-spring-boot
