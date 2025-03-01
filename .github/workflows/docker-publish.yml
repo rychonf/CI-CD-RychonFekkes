@@ -95,4 +95,4 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f kubernetes/deployment.yaml
-          kubectl rollout status deployment/htmx-spring-boot-deployment
+          kubectl rollout status deployment/htmx-spring-boot
