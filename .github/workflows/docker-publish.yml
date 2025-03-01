@@ -94,13 +94,13 @@ jobs:
           chmod 600 ~/.kube/config
           export KUBECONFIG=~/.kube/config
 
-      - name: Debug Kubernetes Connection
-        run: |
-          ls -lah ~/.kube
-          cat ~/.kube/config
-          kubectl config view
-          kubectl cluster-info
-          kubectl get nodes
+#      - name: Debug Kubernetes Connection
+#        run: |
+#          ls -lah ~/.kube
+#          cat ~/.kube/config
+#          kubectl config view
+#          kubectl cluster-info
+#          kubectl get nodes
 
       - name: update image
         run: |
