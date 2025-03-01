@@ -33,10 +33,6 @@ jobs:
         run: |
           podman build -t htmx-spring-boot:${{ env.IMAGE_TAG }} .
 
-#      - name: Tag image for DigitalOcean Container Registry
-#        run: |
-#          podman tag localhost/htmx-spring-boot:1 registry.digitalocean.com/cicdrych/htmx-spring-boot:1
-
       - name: Push Docker image to DigitalOcean Container Registry
         run: |
           podman tag localhost/htmx-spring-boot:${{ env.IMAGE_TAG }} registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
@@ -74,11 +70,6 @@ jobs:
           else
             echo "$KUBE_DIR bestaat al"
           fi
-
-      #      - name: Set KUBECONFIG
-      #        run: |
-      #          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config | base64 --decode > kubeconfig
-      #          export KUBECONFIG=kubeconfig
 
       - name: Install kubectl
         run: |
@@ -120,4 +111,4 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f kubernetes/deployment.yaml
-#          kubectl rollout status deployment/htmx-spring-boot
+          kubectl rollout status deployment/htmx-spring-boot
