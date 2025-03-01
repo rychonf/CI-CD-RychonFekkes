@@ -74,10 +74,10 @@ jobs:
             echo "$KUBE_DIR bestaat al"
           fi
 
-      - name: Set KUBECONFIG
-        run: |
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config | base64 --decode > kubeconfig
-          export KUBECONFIG=kubeconfig
+#      - name: Set KUBECONFIG
+#        run: |
+#          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config | base64 --decode > kubeconfig
+#          export KUBECONFIG=kubeconfig
 
       - name: Install kubectl
         run: |
@@ -88,6 +88,20 @@ jobs:
           else
             echo "kubectl is al geïnstalleerd"
           fi
+
+      - name: Configure Kubernetes
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
+          mkdir -p ~/.kube
+          mv kubeconfig ~/.kube/config
+          chmod 600 ~/.kube/config
+          export KUBECONFIG=~/.kube/config
+
+      - name: Debug Kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
+          cat kubeconfig
+
 
       - name: Check Kubernetes Context
         run: |
