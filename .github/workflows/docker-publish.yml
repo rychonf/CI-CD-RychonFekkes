@@ -74,10 +74,10 @@ jobs:
             echo "$KUBE_DIR bestaat al"
           fi
 
-#      - name: Set KUBECONFIG
-#        run: |
-#          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config | base64 --decode > kubeconfig
-#          export KUBECONFIG=kubeconfig
+      #      - name: Set KUBECONFIG
+      #        run: |
+      #          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config | base64 --decode > kubeconfig
+      #          export KUBECONFIG=kubeconfig
 
       - name: Install kubectl
         run: |
@@ -97,14 +97,10 @@ jobs:
           chmod 600 ~/.kube/config
           export KUBECONFIG=~/.kube/config
 
-      - name: Debug Kubeconfig
+      - name: Debug Kubernetes Connection
         run: |
-          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
-          cat kubeconfig
-
-
-      - name: Check Kubernetes Context
-        run: |
+          ls -lah ~/.kube
+          cat ~/.kube/config
           kubectl config view
           kubectl cluster-info
           kubectl get nodes
