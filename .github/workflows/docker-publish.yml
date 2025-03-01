@@ -40,11 +40,17 @@ jobs:
       - name: Define image tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
+      - name: Check existing images in DigitalOcean Registry
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          doctl registry repository list-manifests cicdrych/htmx-spring-boot
+
       - name: Delete old image from DigitalOcean Registry
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
         run: |
           doctl registry repository delete-manifest cicdrych/htmx-spring-boot --tag latest --force || echo "Geen oude 'latest' image gevonden, overslaan."
-          env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}    
 
       - name: Build Docker image with Podman
         run: |
