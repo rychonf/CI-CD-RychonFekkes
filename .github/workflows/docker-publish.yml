@@ -9,12 +9,12 @@ on:
       - main
 
 jobs:
-  # Job 1: Build en Push naar DigitalOcean Registers
+  # Job 1: Build en Push naar DigitalOcean Registry
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout codes
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Install Podman
@@ -22,12 +22,32 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y podman
 
+      - name: Install doctl (DigitalOcean CLI)
+        run: |
+          if ! command -v doctl &> /dev/null; then
+            echo "doctl niet gevonden. Installeren..."
+            curl -L https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
+            chmod +x doctl
+            sudo mv doctl /usr/local/bin/
+          else
+            echo "doctl is al geïnstalleerd."
+          fi
+
+      - name: Authenticate doctl
+        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Define IMAGE_TAG
+        run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Delete old image from DigitalOcean Registry
+        run: |
+          doctl registry repository delete-manifest cicdrych/htmx-spring-boot --tag latest --force || echo "⚠️ Geen oude 'latest' image gevonden, overslaan."
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
       - name: Log in to DigitalOcean Container Registry
         run: |
-          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username ${{ secrets.DIGITALOCEAN_USERNAME }} --password-stdin
-
-      - name: Define image tag
-        run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username "oauth2" --password-stdin
 
       - name: Build Docker image with Podman
         run: |
@@ -38,7 +58,6 @@ jobs:
           podman tag localhost/htmx-spring-boot:${{ env.IMAGE_TAG }} registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
           podman push registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
 
-
   # Job 2: Deploy naar Kubernetes
   deploy:
     runs-on: ubuntu-latest
@@ -47,29 +66,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Install doctl if not present
-        run: |
-          if ! command -v doctl &> /dev/null; then
-            echo "doctl niet gevonden. Installeren..."
-            curl -L https://github.com/digitalocean/doctl/releases/download/v1.87.0/doctl-1.87.0-linux-amd64.tar.gz -o doctl.tar.gz
-            tar xzf doctl.tar.gz
-            sudo mv doctl /usr/local/bin/
-          else
-            echo "doctl is al geïnstalleerd. Installatie overslaan."
-          fi
-
-      - name: Authenticate doctl
-        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-      - name: Create .kube directory
-        run: |
-          KUBE_DIR=$HOME/.kube
-          if [ ! -d "$KUBE_DIR" ]; then
-            mkdir -p $KUBE_DIR
-          else
-            echo "$KUBE_DIR bestaat al"
-          fi
 
       - name: Install kubectl
         run: |
@@ -93,7 +89,6 @@ jobs:
           mv kubeconfig ~/.kube/config
           chmod 600 ~/.kube/config
           export KUBECONFIG=~/.kube/config
-      
 
       - name: Debug Kubernetes Connection
         run: |
@@ -103,10 +98,14 @@ jobs:
           kubectl cluster-info
           kubectl get nodes
 
-      - name: update image
+      - name: Install yq (voor YAML-verwerking)
         run: |
-          IMAGE_NAME=registry.digitalocean.com/cicdrych/htmx-spring-boot:1          
-          sed -i "s|image: .*|image: $IMAGE_NAME|g" kubernetes/deployment.yaml
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update image in deployment.yaml
+        run: |
+          yq eval ".spec.template.spec.containers[0].image = \"registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}\"" -i kubernetes/deployment.yaml
 
       - name: Deploy to Kubernetes
         run: |
