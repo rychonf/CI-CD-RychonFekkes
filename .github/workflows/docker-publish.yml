@@ -31,9 +31,9 @@ jobs:
 
       - name: Delete old image from DigitalOcean Registry
         run: |
-            doctl registry repository delete-manifest cicdrych/htmx-spring-boot --tag latest --force || echo "Geen oude 'latest' image gevonden, overslaan."
+          doctl registry repository delete-manifest cicdrych/htmx-spring-boot --tag latest --force || echo "Geen oude 'latest' image gevonden, overslaan."
           env:
-            DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}    
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}    
 
       - name: Build Docker image with Podman
         run: |
