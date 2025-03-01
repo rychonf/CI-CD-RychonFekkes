@@ -15,7 +15,7 @@ spec:
         app: htmx-spring-boot
     spec:
       imagePullSecrets:
-        - name: registry-cicdrych
+        - name: digitalocean-registry-secret
       containers:
         - name: htmx-spring-boot
           image: registry.digitalocean.com/cicdrych/htmx-spring-boot:1
