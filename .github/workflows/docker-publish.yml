@@ -26,9 +26,12 @@ jobs:
         run: |
           echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username ${{ secrets.DIGITALOCEAN_USERNAME }} --password-stdin
 
+      - name: Define image tag
+        run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+
       - name: Build Docker image with Podman
         run: |
-          podman build -t htmx-spring-boot:1 .
+          podman build -t htmx-spring-boot:${{ env.IMAGE_TAG }} .
 
       - name: Tag image for DigitalOcean Container Registry
         run: |
@@ -36,11 +39,9 @@ jobs:
 
       - name: Push Docker image to DigitalOcean Container Registry
         run: |
-          set -e
-          (podman push registry.digitalocean.com/cicdrych/htmx-spring-boot:1 || {
-          echo "Fout: 403 Forbidden. Waarschijnlijk bestaat er al een image met deze tag. Verwijder deze eerst in de Container Registry op DigitalOcean.";
-          exit 1; 
-          })
+          podman tag localhost/htmx-spring-boot:${{ env.IMAGE_TAG }} registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
+          podman push registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
+
 
   # Job 2: Deploy naar Kubernetes
   deploy:
@@ -81,21 +82,27 @@ jobs:
 
       - name: Install kubectl
         run: |
-          if ! command -v kubectl &> /dev/null; then
-            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-            chmod +x ./kubectl
-            sudo mv ./kubectl /usr/local/bin/kubectl
+          if kubectl version --client &> /dev/null; then
+            echo "Kubectl is al geïnstalleerd"
           else
-            echo "kubectl is al geïnstalleerd"
+            echo "Kubectl niet gevonden, installeren..."
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/kubectl
           fi
 
       - name: Configure Kubernetes
         run: |
           echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
+          if [ ! -s kubeconfig ]; then
+            echo "ERROR: Kubeconfig is leeg of verkeerd gedecodeerd!"
+            exit 1
+          fi
           mkdir -p ~/.kube
           mv kubeconfig ~/.kube/config
           chmod 600 ~/.kube/config
           export KUBECONFIG=~/.kube/config
+      
 
       - name: Debug Kubernetes Connection
         run: |

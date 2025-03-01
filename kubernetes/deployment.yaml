@@ -4,7 +4,6 @@ metadata:
   name: htmx-spring-boot
   namespace: default
 spec:
-#  progressDeadlineSeconds: 600
   replicas: 1
   selector:
     matchLabels:
@@ -18,7 +17,7 @@ spec:
         - name: digitalocean-registry-secret
       containers:
         - name: htmx-spring-boot
-          image: registry.digitalocean.com/cicdrych/htmx-spring-boot:1
+          image: registry.digitalocean.com/cicdrych/htmx-spring-boot:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
