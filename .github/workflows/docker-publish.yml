@@ -83,7 +83,7 @@ jobs:
 
       - name: Push Docker image to DigitalOcean Container Registry
         run: |
-          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username "oauth2" --password-stdin
+          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login --tls-verify=false --username "oauth2" --password-stdin registry.digitalocean.com
           podman push registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
 
       - name: Run DigitalOcean Garbage Collection
