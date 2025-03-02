@@ -124,8 +124,16 @@ jobs:
             echo "doctl is al geïnstalleerd."
           fi  
 
-      - name: Authenticate doctl
-        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Debug doctl installatie
+        run: |
+          echo "Controleren of doctl correct is geïnstalleerd..."
+          if command -v doctl &> /dev/null; then
+            echo "doctl gevonden op $(which doctl)"
+            doctl version
+          else
+            echo "ERROR: doctl is nog steeds niet geïnstalleerd!"
+            exit 1
+          fi
 
       - name: Configure Kubernetes Kubeconfig
         run: |
