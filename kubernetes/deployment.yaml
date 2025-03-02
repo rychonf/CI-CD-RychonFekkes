@@ -20,4 +20,4 @@ spec:
           image: registry.digitalocean.com/cicdrych/htmx-spring-boot:IMAGE_TAG_PLACEHOLDER
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 1010

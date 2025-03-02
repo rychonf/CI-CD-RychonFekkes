@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: htmx-spring-boot-service
+  namespace: default
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-size-slug: "lb-small"  # Specifiek voor DigitalOcean
+spec:
+  type: LoadBalancer  # Zorgt voor extern IP-adres
+  selector:
+    app: htmx-spring-boot  # Moet exact overeenkomen met de Deployment labels
+  ports:
+    - protocol: TCP
+      port: 80         # Externe poort (waar gebruikers toegang krijgen)
+      targetPort: 1010  # Poort binnen de container (zoals gedefinieerd in deployment.yaml)
