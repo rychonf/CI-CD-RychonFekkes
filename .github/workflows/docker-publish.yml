@@ -33,8 +33,11 @@ jobs:
             echo "doctl is al geïnstalleerd."
           fi      
 
-      - name: Authenticate doctl
-        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Authenticate DigitalOcean CLI (doctl)
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          doctl auth init --access-token "$DIGITALOCEAN_ACCESS_TOKEN"
 
       - name: Define image tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
