@@ -145,7 +145,7 @@ jobs:
           if command -v snap &> /dev/null && snap list doctl &> /dev/null; then
             sudo snap connect doctl:kube-config
           fi
-          doctl kubernetes cluster kubeconfig save k8s-1-32-1-do-0-ams3-1740567483244 --kubeconfig ~/.kube/config
+          doctl kubernetes cluster kubeconfig save k8s-1-32-1-do-0-ams3-1740567483244
 
       - name: Update image in deployment.yaml
         run: |
