@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout codes
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Install Podman
@@ -25,43 +25,49 @@ jobs:
       - name: Install doctl if not present
         run: |
           if ! command -v doctl &> /dev/null; then
-          echo "doctl niet gevonden. Installeren..."
-          curl -L https://github.com/digitalocean/doctl/releases/download/v1.87.0/doctl-1.87.0-linux-amd64.tar.gz -o doctl.tar.gz
-          tar xzf doctl.tar.gz
-          sudo mv doctl /usr/local/bin/
+            echo "doctl niet gevonden. Installeren..."
+            curl -L https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
+            chmod +x doctl
+            sudo mv doctl /usr/local/bin/
           else
-          echo "doctl is al geïnstalleerd. Installatie overslaan."
+            echo "doctl is al geïnstalleerd."
           fi      
 
-      - name: Log in to DigitalOcean Container Registry
-        run: |
-          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username ${{ secrets.DIGITALOCEAN_USERNAME }} --password-stdin
+      - name: Authenticate doctl
+        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Define image tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
-      - name: Check existing images in DigitalOcean Registry
+      - name: Clean up old images in DigitalOcean Registry
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
         run: |
-          doctl registry repository list-manifests cicdrych/htmx-spring-boot
+          KEEP_IMAGES=5
+          IMAGES_TO_DELETE=$(doctl registry repository list-manifests cicdrych/htmx-spring-boot --format Digest --no-header | tail -n +$((KEEP_IMAGES+1)))
+          
+          if [ -n "$IMAGES_TO_DELETE" ]; then
+            echo "Verwijderen van oude images..."
+            echo "$IMAGES_TO_DELETE" | xargs -I {} doctl registry repository delete-manifest cicdrych/htmx-spring-boot --digest {} --force
+          else
+            echo "Geen oude images om te verwijderen!"
+          fi
 
-      - name: Delete old image from DigitalOcean Registry
-        env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Build Docker image with Podman (Optimized)
         run: |
-          doctl registry repository delete-manifest cicdrych/htmx-spring-boot --tag latest --force || echo "Geen oude 'latest' image gevonden, overslaan."
-
-      - name: Build Docker image with Podman
-        run: |
-          podman build -t htmx-spring-boot:${{ env.IMAGE_TAG }} .
+          podman build --squash -t registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }} .
 
       - name: Push Docker image to DigitalOcean Container Registry
         run: |
           echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username "oauth2" --password-stdin
-          podman tag localhost/htmx-spring-boot:${{ env.IMAGE_TAG }} registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
           podman push registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
-  
+
+      - name: Run DigitalOcean Garbage Collection
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          echo "Starten van DigitalOcean Garbage Collection..."
+          doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."
 
   # Job 2: Deploy naar Kubernetes
   deploy:
@@ -75,7 +81,7 @@ jobs:
       - name: Install kubectl
         run: |
           if kubectl version --client &> /dev/null; then
-            echo "Kubectl is al geïnstalleerd"
+            echo "Kubectl is al geïnstalleerd."
           else
             echo "Kubectl niet gevonden, installeren..."
             curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -86,12 +92,12 @@ jobs:
       - name: Install doctl if not present
         run: |
           if ! command -v doctl &> /dev/null; then
-          echo "doctl niet gevonden. Installeren..."
-          curl -L https://github.com/digitalocean/doctl/releases/download/v1.87.0/doctl-1.87.0-linux-amd64.tar.gz -o doctl.tar.gz
-          tar xzf doctl.tar.gz
-          sudo mv doctl /usr/local/bin/
+            echo "doctl niet gevonden. Installeren..."
+            curl -L https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
+            chmod +x doctl
+            sudo mv doctl /usr/local/bin/
           else
-          echo "doctl is al geïnstalleerd. Installatie overslaan."
+            echo "doctl is al geïnstalleerd."
           fi  
 
       - name: Authenticate doctl
@@ -101,32 +107,12 @@ jobs:
         run: |
           doctl kubernetes cluster kubeconfig save my-cluster     
 
-      #      - name: Configure Kubernetes
-      #        run: |
-      #          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
-      #          if [ ! -s kubeconfig ]; then
-      #            echo "ERROR: Kubeconfig is leeg of verkeerd gedecodeerd!"
-      #            exit 1
-      #          fi
-      #          mkdir -p ~/.kube
-      #          mv kubeconfig ~/.kube/config
-      #          chmod 600 ~/.kube/config
-      #          export KUBECONFIG=~/.kube/config
-
-      #      - name: Debug Kubernetes Connection
-      #        run: |
-      #          ls -lah ~/.kube
-      #          cat ~/.kube/config
-      #          kubectl config view
-      #          kubectl cluster-info
-      #          kubectl get nodes
-
-      - name: update image
+      - name: Update image in deployment.yaml
         run: |
-          IMAGE_NAME=registry.digitalocean.com/cicdrych/htmx-spring-boot:latest         
+          IMAGE_NAME=registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
           sed -i "s|image: .*|image: $IMAGE_NAME|g" kubernetes/deployment.yaml
 
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f kubernetes/deployment.yaml
-#          kubectl rollout status deployment/htmx-spring-boot
+          kubectl rollout status deployment/htmx-spring-boot
