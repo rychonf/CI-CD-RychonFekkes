@@ -36,6 +36,18 @@ jobs:
             doctl version
           fi
 
+      - name: Debug DigitalOcean CLI (doctl)
+        run: |
+          echo "Controleren of doctl correct is geïnstalleerd..."
+          if command -v doctl &> /dev/null; then
+            echo "doctl gevonden op $(which doctl)"
+            ls -lah $(which doctl)
+            doctl version
+          else
+            echo "ERROR: doctl is nog steeds niet geïnstalleerd!"
+            exit 1
+          fi
+
       - name: Authenticate DigitalOcean CLI (doctl)
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
