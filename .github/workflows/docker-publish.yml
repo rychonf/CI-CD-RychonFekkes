@@ -141,7 +141,7 @@ jobs:
 
       - name: Configure Kubernetes Kubeconfig
         run: |
-          doctl kubernetes cluster kubeconfig save my-cluster     
+          doctl kubernetes cluster kubeconfig save k8s-1-32-1-do-0-ams3-1740567483244     
 
       - name: Update image in deployment.yaml
         run: |
