@@ -55,16 +55,23 @@ jobs:
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
         run: |
-          KEEP_IMAGES=2
+          KEEP_IMAGES=1
 
-          # Haal alle manifests op en sorteer op aanmaakdatum
-          IMAGES_TO_DELETE=$(doctl registry repository list-manifests cicdrych/htmx-spring-boot --format Digest,CreatedAt --no-header | sort -k2 | awk '{print $1}' | tail -n +$((KEEP_IMAGES+1)))
+          echo "Ophalen van image manifests..."
 
-          if [ -n "$IMAGES_TO_DELETE" ]; then
+          # Haal alle manifests op en filter alleen de digests, sorteer op aanmaakdatum
+          IMAGES_TO_DELETE=$(doctl registry repository list-manifests cicdrych/htmx-spring-boot \
+            --format Digest,CreatedAt --no-header | sort -k2 | awk '{print $1}' | tail -n +$((KEEP_IMAGES+1)))
+
+          # Controleer of er daadwerkelijk iets te verwijderen is
+          if [[ -n "$IMAGES_TO_DELETE" ]]; then
             echo "Verwijderen van oude images..."
             echo "$IMAGES_TO_DELETE" | while read -r DIGEST; do
-              echo "Verwijderen van image met digest: $DIGEST"
-              doctl registry repository delete-manifest cicdrych/htmx-spring-boot --digest "$DIGEST" --force || echo "Fout bij verwijderen van $DIGEST"
+              if [[ -n "$DIGEST" ]]; then
+                echo "Verwijderen van image met digest: $DIGEST"
+                doctl registry repository delete-manifest cicdrych/htmx-spring-boot --digest "$DIGEST" --force \
+                  || echo "Fout bij verwijderen van $DIGEST"
+              fi
             done
           else
             echo "Geen oude images om te verwijderen!"
