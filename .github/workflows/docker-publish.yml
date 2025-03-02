@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   # Job 1: Build en Push naar DigitalOcean Registers
   build:
