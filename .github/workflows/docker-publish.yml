@@ -22,27 +22,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y podman
 
-      - name: Install doctl (Fix for 404 Error)
+      - name: Install doctl (via snap)
         run: |
-          echo "Verwijderen van corrupte doctl (indien aanwezig)..."
-          sudo rm -f /usr/local/bin/doctl
-          echo "Oude of corrupte doctl verwijderd."
+          sudo apt update
+          sudo apt install -y snapd
+          sudo snap install doctl
 
-          echo "Downloaden en installeren van doctl..."
-          curl -fsSL -o doctl.tar.gz https://github.com/digitalocean/doctl/releases/latest/download/doctl-1.97.0-linux-amd64.tar.gz
-          tar xzf doctl.tar.gz
-          sudo mv doctl /usr/local/bin/doctl
-          sudo chmod +x /usr/local/bin/doctl
-          echo "doctl succesvol geïnstalleerd!"
-
-          echo "Controleren of doctl correct werkt..."
-          doctl version || echo "ERROR: doctl werkt nog steeds niet!"
-
-      - name: Debug doctl download
+      - name: Debug doctl installatie
         run: |
-          echo "🚀 Controleren of het bestand een geldige binaire is..."
-          file /usr/local/bin/doctl || echo "Fout: Ongeldige binaire doctl!"
-          head -n 10 /usr/local/bin/doctl
+          echo "Controleren of doctl correct is geïnstalleerd..."
+          if command -v doctl &> /dev/null; then
+            echo "doctl gevonden op $(which doctl)"
+            doctl version
+          else
+            echo "ERROR: doctl is nog steeds niet geïnstalleerd!"
+            exit 1
+          fi
 
       - name: Authenticate DigitalOcean CLI (doctl)
         env:
