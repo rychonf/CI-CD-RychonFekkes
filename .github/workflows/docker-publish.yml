@@ -22,7 +22,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y podman
 
-      - name: Install doctl (via snap)
+      - name: Install doctl (via snap)!
         run: |
           sudo apt update
           sudo apt install -y snapd
