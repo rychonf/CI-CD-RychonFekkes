@@ -22,17 +22,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y podman
 
-      - name: Install doctl if not present
-        run: |
-          if ! command -v doctl &> /dev/null; then
-            echo "doctl niet gevonden. Installeren..."
-            curl -L https://github.com/digitalocean/doctl/releases/download/v1.87.0/doctl-1.87.0-linux-amd64.tar.gz -o doctl.tar.gz
-            tar xzf doctl.tar.gz
-            sudo mv doctl /usr/local/bin/
-          else
-            echo "doctl is al geïnstalleerd. Installatie overslaan."
-          fi        
-
       - name: Log in to DigitalOcean Container Registry
         run: |
           echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username ${{ secrets.DIGITALOCEAN_USERNAME }} --password-stdin
@@ -84,25 +73,43 @@ jobs:
             sudo mv kubectl /usr/local/bin/kubectl
           fi
 
-      - name: Configure Kubernetes
+      - name: Install doctl if not present
         run: |
-          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
-          if [ ! -s kubeconfig ]; then
-            echo "ERROR: Kubeconfig is leeg of verkeerd gedecodeerd!"
-            exit 1
-          fi
-          mkdir -p ~/.kube
-          mv kubeconfig ~/.kube/config
-          chmod 600 ~/.kube/config
-          export KUBECONFIG=~/.kube/config
+          if ! command -v doctl &> /dev/null; then
+          echo "doctl niet gevonden. Installeren..."
+          curl -L https://github.com/digitalocean/doctl/releases/download/v1.87.0/doctl-1.87.0-linux-amd64.tar.gz -o doctl.tar.gz
+          tar xzf doctl.tar.gz
+          sudo mv doctl /usr/local/bin/
+          else
+          echo "doctl is al geïnstalleerd. Installatie overslaan."
+          fi  
 
-#      - name: Debug Kubernetes Connection
+      - name: Authenticate doctl
+        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Configure Kubernetes Kubeconfig
+        run: |
+          doctl kubernetes cluster kubeconfig save my-cluster     
+
+#      - name: Configure Kubernetes
 #        run: |
-#          ls -lah ~/.kube
-#          cat ~/.kube/config
-#          kubectl config view
-#          kubectl cluster-info
-#          kubectl get nodes
+#          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
+#          if [ ! -s kubeconfig ]; then
+#            echo "ERROR: Kubeconfig is leeg of verkeerd gedecodeerd!"
+#            exit 1
+#          fi
+#          mkdir -p ~/.kube
+#          mv kubeconfig ~/.kube/config
+#          chmod 600 ~/.kube/config
+#          export KUBECONFIG=~/.kube/config
+
+      #      - name: Debug Kubernetes Connection
+      #        run: |
+      #          ls -lah ~/.kube
+      #          cat ~/.kube/config
+      #          kubectl config view
+      #          kubectl cluster-info
+      #          kubectl get nodes
 
       - name: update image
         run: |
