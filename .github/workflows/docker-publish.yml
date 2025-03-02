@@ -140,10 +140,13 @@ jobs:
           fi
           doctl kubernetes cluster kubeconfig save k8s-1-32-1-do-0-ams3-1740567483244
 
-      - name: Update image in deployment.yaml
+      - name: Update Deployment YAML met Image Tag
         run: |
-          IMAGE_NAME=registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
-          sed -i "s|image: .*|image: $IMAGE_NAME|g" kubernetes/deployment.yaml
+          IMAGE_NAME="registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}"
+          sed -i "s|{{IMAGE_TAG}}|$IMAGE_NAME|g" kubernetes/deployment.yaml
+
+      - name: Debug Deployment YAML
+        run: cat kubernetes/deployment.yaml
 
       - name: Deploy to Kubernetes
         run: |
