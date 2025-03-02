@@ -113,16 +113,11 @@ jobs:
             sudo mv kubectl /usr/local/bin/kubectl
           fi
 
-      - name: Install doctl if not present
+      - name: Install doctl (via snap)
         run: |
-          if ! command -v doctl &> /dev/null; then
-            echo "doctl niet gevonden. Installeren..."
-            curl -L https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
-            chmod +x doctl
-            sudo mv doctl /usr/local/bin/
-          else
-            echo "doctl is al geïnstalleerd."
-          fi  
+          sudo apt update
+          sudo apt install -y snapd
+          sudo snap install doctl
 
       - name: Debug doctl installatie
         run: |
