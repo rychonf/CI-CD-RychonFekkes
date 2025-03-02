@@ -17,7 +17,7 @@ spec:
         - name: digitalocean-registry-secret
       containers:
         - name: htmx-spring-boot
-          image: registry.digitalocean.com/htmx-spring-boot:IMAGE_TAG_PLACEHOLDER
+          image: registry.digitalocean.com/cicdrych/htmx-spring-boot:IMAGE_TAG_PLACEHOLDER
           imagePullPolicy: Always
           ports:
             - containerPort: 1010
