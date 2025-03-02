@@ -139,9 +139,13 @@ jobs:
           doctl account get || echo "ERROR: Authenticatie is mislukt!"
           echo "doctl is succesvol geauthenticeerd!"      
 
-      - name: Configure Kubernetes Kubeconfig
+      - name: Configure Kubernetes
         run: |
-          doctl kubernetes cluster kubeconfig save k8s-1-32-1-do-0-ams3-1740567483244     
+          mkdir -p ~/.kube && chmod 700 ~/.kube
+          if command -v snap &> /dev/null && snap list doctl &> /dev/null; then
+            sudo snap connect doctl:kube-config
+          fi
+          doctl kubernetes cluster kubeconfig save k8s-1-32-1-do-0-ams3-1740567483244 --kubeconfig ~/.kube/config
 
       - name: Update image in deployment.yaml
         run: |
