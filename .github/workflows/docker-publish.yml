@@ -22,31 +22,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y podman
 
-      - name: Install doctl if not present
+      - name: Install doctl (Fix for corrupt binary)
         run: |
-          if ! command -v doctl &> /dev/null; then
-            echo "doctl niet gevonden. Installeren..."
-            curl -L https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
-            chmod +x doctl
-            sudo mv doctl /usr/local/bin/doctl
-            sudo chmod +x /usr/local/bin/doctl
-            echo "doctl succesvol geïnstalleerd!"
-          else
-            echo "doctl is al geïnstalleerd: $(which doctl)"
-            doctl version
-          fi
+          echo "Verwijderen van corrupte doctl (indien aanwezig)..."
+          sudo rm -f /usr/local/bin/doctl
+          echo "Oude of corrupte doctl verwijderd."
 
-      - name: Debug DigitalOcean CLI (doctl)
+          echo "Downloaden en installeren van doctl..."
+          curl -fsSL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
+          chmod +x doctl
+          sudo mv doctl /usr/local/bin/doctl
+          echo "doctl succesvol geïnstalleerd!"
+
+          echo "Controleren of doctl correct werkt..."
+          doctl version || echo "ERROR: doctl werkt nog steeds niet!"
+
+      - name: Debug doctl download
         run: |
-          echo "Controleren of doctl correct is geïnstalleerd..."
-          if command -v doctl &> /dev/null; then
-            echo "doctl gevonden op $(which doctl)"
-            ls -lah $(which doctl)
-            doctl version
-          else
-            echo "ERROR: doctl is nog steeds niet geïnstalleerd!"
-            exit 1
-          fi
+          echo "🚀 Controleren of het bestand een geldige binaire is..."
+          file /usr/local/bin/doctl || echo "Fout: Ongeldige binaire doctl!"
+          head -n 10 /usr/local/bin/doctl
 
       - name: Authenticate DigitalOcean CLI (doctl)
         env:
@@ -54,6 +49,7 @@ jobs:
         run: |
           echo "Authenticeren bij DigitalOcean..."
           doctl auth init --access-token "$DIGITALOCEAN_ACCESS_TOKEN"
+          doctl account get || echo "ERROR: Authenticatie is mislukt!"
           echo "doctl is succesvol geauthenticeerd!"
 
       - name: Define image tag
