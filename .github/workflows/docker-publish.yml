@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  # Job 1: Build en Push naar DigitalOcean Registers
+  # Job 1: Build en Push naar DigitalOcean Register
   build:
     runs-on: ubuntu-latest
 
