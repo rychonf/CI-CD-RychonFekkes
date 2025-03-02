@@ -28,16 +28,21 @@ jobs:
             echo "doctl niet gevonden. Installeren..."
             curl -L https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
             chmod +x doctl
-            sudo mv doctl /usr/local/bin/
+            sudo mv doctl /usr/local/bin/doctl
+            sudo chmod +x /usr/local/bin/doctl
+            echo "doctl succesvol geïnstalleerd!"
           else
-            echo "doctl is al geïnstalleerd."
-          fi      
+            echo "doctl is al geïnstalleerd: $(which doctl)"
+            doctl version
+          fi
 
       - name: Authenticate DigitalOcean CLI (doctl)
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
         run: |
+          echo "Authenticeren bij DigitalOcean..."
           doctl auth init --access-token "$DIGITALOCEAN_ACCESS_TOKEN"
+          echo "doctl is succesvol geauthenticeerd!"
 
       - name: Define image tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
