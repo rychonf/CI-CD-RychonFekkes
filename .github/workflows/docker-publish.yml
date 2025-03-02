@@ -130,6 +130,15 @@ jobs:
             exit 1
           fi
 
+      - name: Authenticate DigitalOcean CLI (doctl)
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          echo "Authenticeren bij DigitalOcean..."
+          doctl auth init --access-token "$DIGITALOCEAN_ACCESS_TOKEN"
+          doctl account get || echo "ERROR: Authenticatie is mislukt!"
+          echo "doctl is succesvol geauthenticeerd!"      
+
       - name: Configure Kubernetes Kubeconfig
         run: |
           doctl kubernetes cluster kubeconfig save my-cluster     
