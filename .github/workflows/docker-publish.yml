@@ -58,9 +58,11 @@ jobs:
 
       - name: Push Docker image to DigitalOcean Container Registry
         run: |
+          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | podman login registry.digitalocean.com --username "oauth2" --password-stdin
           podman tag localhost/htmx-spring-boot:${{ env.IMAGE_TAG }} registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
           podman push registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
-
+  
+  
 
   # Job 2: Deploy naar Kubernetes
   deploy:
