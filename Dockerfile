@@ -47,7 +47,7 @@ RUN apk update && apk add --no-cache \
     libssl3 curl ca-certificates
 
 # Expose applicatie poort
-EXPOSE 1010
+EXPOSE 8080
 
 # Run the application
 CMD ["java", "-jar", "app.jar", "--logging.file.name=/app/logs/app.log"]
