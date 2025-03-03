@@ -148,7 +148,8 @@ jobs:
 
       - name: Update Deployment YAML met Image Tag
         run: |
-          sed -i "s|IMAGE_TAG_PLACEHOLDER|registry.digitalocean.com/cicdrych/htmx-spring-boot:sha-${{ github.sha }}|g" kubernetes/deployment.yaml
+          SHA_PLACEHOLDER="sha-${{ github.sha }}"
+          sed -i "s|image: .*|image: registry.digitalocean.com/cicdrych/htmx-spring-boot:$SHA_PLACEHOLDER|g" kubernetes/deployment.yaml
 
       - name: Debug Deployment YAML
         run: cat kubernetes/deployment.yaml
