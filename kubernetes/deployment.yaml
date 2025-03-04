@@ -33,6 +33,3 @@ spec:
             limits:
               memory: "500Mi"
               cpu: "500m"
-          env:
-            - name: JAVA_OPTS
-              value: "-XX:+UseContainerSupport -Xms128m -Xmx384m"
