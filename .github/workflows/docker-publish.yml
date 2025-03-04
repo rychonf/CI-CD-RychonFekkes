@@ -25,32 +25,22 @@ jobs:
             echo "Podman is already installed"
           fi
 
-#      - name: Install doctl if not already installed
-#        run: |
-#          if ! command -v snap &> /dev/null; then
-#            echo "Installing Snapd..."
-#            sudo apt update
-#            sudo apt install -y snapd
-#          else
-#            echo "Snapd is already installed"
-#          fi
-#
-#          if ! snap list | grep -q doctl; then
-#            echo "Installing doctl..."
-#            sudo snap install doctl
-#          else
-#            echo "doctl is already installed"
-#          fi
-
-      - name: Install doctl (zonder Snap)
+      - name: Install doctl if not already installed
         run: |
-            if ! command -v doctl &> /dev/null; then
-              echo "Installing doctl..."
-              curl -sL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m).tar.gz | tar -xzv
-              sudo mv doctl /usr/local/bin/
-            else
-              echo "doctl is already installed"
-            fi
+          if ! command -v snap &> /dev/null; then
+            echo "Installing Snapd..."
+            sudo apt update
+            sudo apt install -y snapd
+          else
+            echo "Snapd is already installed"
+          fi
+
+          if ! snap list | grep -q doctl; then
+            echo "Installing doctl..."
+            sudo snap install doctl
+          else
+            echo "doctl is already installed"
+          fi
 
       - name: Debug doctl installatie
         run: |
@@ -143,32 +133,22 @@ jobs:
             echo "Podman is already installed"
           fi 
 
-#      - name: Install doctl if not already installed
-#        run: |
-#          if ! command -v snap &> /dev/null; then
-#            echo "Installing Snapd..."
-#            sudo apt update
-#            sudo apt install -y snapd
-#          else
-#            echo "Snapd is already installed"
-#          fi
-#
-#          if ! snap list | grep -q doctl; then
-#            echo "Installing doctl..."
-#            sudo snap install doctl
-#          else
-#            echo "doctl is already installed"
-#          fi
-
-      - name: Install doctl (zonder Snap)
+      - name: Install doctl if not already installed
         run: |
-            if ! command -v doctl &> /dev/null; then
-              echo "Installing doctl..."
-              curl -sL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m).tar.gz | tar -xzv
-              sudo mv doctl /usr/local/bin/
-            else
-              echo "doctl is already installed"
-            fi
+          if ! command -v snap &> /dev/null; then
+            echo "Installing Snapd..."
+            sudo apt update
+            sudo apt install -y snapd
+          else
+            echo "Snapd is already installed"
+          fi
+
+          if ! snap list | grep -q doctl; then
+            echo "Installing doctl..."
+            sudo snap install doctl
+          else
+            echo "doctl is already installed"
+          fi
 
       - name: Debug doctl installatie
         run: |
