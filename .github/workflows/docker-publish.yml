@@ -88,10 +88,10 @@ jobs:
 #
 #            echo "Opruimen voltooid!"
 
-      - name: Leeg de Digital Ocean Garbage Collection
-        run: |
-          echo "Starten van DigitalOcean Garbage Collection..."
-          doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."      
+#      - name: Leeg de Digital Ocean Garbage Collection
+#        run: |
+#          echo "Starten van DigitalOcean Garbage Collection..."
+#          doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."
 
       - name: Bouw de Docker image met Podman
         run: |
