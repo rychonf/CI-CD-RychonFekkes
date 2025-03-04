@@ -16,16 +16,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Podman
+      - name: Install Podman if not already installed
         run: |
-          sudo apt-get update
-          sudo apt-get install -y podman
+          if ! command -v podman &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y podman
+          else
+            echo "Podman is already installed"
+          fi
 
-      - name: Install doctl (via snap)!
+#      - name: Install doctl if not already installed
+#        run: |
+#          if ! command -v snap &> /dev/null; then
+#            echo "Installing Snapd..."
+#            sudo apt update
+#            sudo apt install -y snapd
+#          else
+#            echo "Snapd is already installed"
+#          fi
+#
+#          if ! snap list | grep -q doctl; then
+#            echo "Installing doctl..."
+#            sudo snap install doctl
+#          else
+#            echo "doctl is already installed"
+#          fi
+
+      - name: Install doctl (zonder Snap)
         run: |
-          sudo apt update
-          sudo apt install -y snapd
-          sudo snap install doctl
+            if ! command -v doctl &> /dev/null; then
+              echo "Installing doctl..."
+              curl -sL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m).tar.gz | tar -xzv
+              sudo mv doctl /usr/local/bin/
+            else
+              echo "doctl is already installed"
+            fi
 
       - name: Debug doctl installatie
         run: |
@@ -65,7 +90,7 @@ jobs:
                 exit 0
             fi
             
-            echo "🗑️ De volgende images worden verwijderd:"
+            echo "De volgende images worden verwijderd:"
             echo "$OLD_IMAGES"
             
             for IMAGE in $OLD_IMAGES; do
@@ -109,16 +134,41 @@ jobs:
             sudo mv kubectl /usr/local/bin/kubectl
           fi
           
-      - name: Install Podman
+      - name: Install Podman if not already installed
         run: |
-          sudo apt update
-          sudo apt install -y podman 
+          if ! command -v podman &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y podman
+          else
+            echo "Podman is already installed"
+          fi 
 
-      - name: Install doctl (via snap)
+#      - name: Install doctl if not already installed
+#        run: |
+#          if ! command -v snap &> /dev/null; then
+#            echo "Installing Snapd..."
+#            sudo apt update
+#            sudo apt install -y snapd
+#          else
+#            echo "Snapd is already installed"
+#          fi
+#
+#          if ! snap list | grep -q doctl; then
+#            echo "Installing doctl..."
+#            sudo snap install doctl
+#          else
+#            echo "doctl is already installed"
+#          fi
+
+      - name: Install doctl (zonder Snap)
         run: |
-          sudo apt update
-          sudo apt install -y snapd
-          sudo snap install doctl
+            if ! command -v doctl &> /dev/null; then
+              echo "Installing doctl..."
+              curl -sL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m).tar.gz | tar -xzv
+              sudo mv doctl /usr/local/bin/
+            else
+              echo "doctl is already installed"
+            fi
 
       - name: Debug doctl installatie
         run: |
