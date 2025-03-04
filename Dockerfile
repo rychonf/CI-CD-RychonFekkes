@@ -48,6 +48,7 @@ RUN apk update && apk add --no-cache \
 
 # Expose applicatie poort
 EXPOSE 1010
+ENV SERVER_PORT=1010
 
 # Run the application
 CMD ["java", "-jar", "app.jar", "--logging.file.name=/app/logs/app.log"]

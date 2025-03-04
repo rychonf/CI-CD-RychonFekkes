@@ -50,31 +50,19 @@ jobs:
       - name: Define image tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
-      - name: Clean up old images in DigitalOcean Registry
-        env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Haal de lijst met images op en verwijder oude
         run: |
-          KEEP_IMAGES=1
+            # Haal alle privé-images op en sorteer op created_at datum
+            IMAGES=$(doctl compute image list-user --format ID,Created --no-header | sort -k2,2 -r)
 
-          echo "Ophalen van image manifests..."
+            # Pak alle image ID's behalve de nieuwste (eerste)
+            OLD_IMAGES=$(echo "$IMAGES" | tail -n +2 | awk '{print $1}')
 
-          # Haal alle manifests op en filter alleen de digests, sorteer op aanmaakdatum
-          IMAGES_TO_DELETE=$(doctl registry repository list-manifests cicdrych/htmx-spring-boot \
-            --format Digest,CreatedAt --no-header | sort -k2 | awk '{print $1}' | tail -n +$((KEEP_IMAGES+1)))
-
-          # Controleer of er daadwerkelijk iets te verwijderen is
-          if [[ -n "$IMAGES_TO_DELETE" ]]; then
-            echo "Verwijderen van oude images..."
-            echo "$IMAGES_TO_DELETE" | while read -r DIGEST; do
-              if [[ -n "$DIGEST" ]]; then
-                echo "Verwijderen van image met digest: $DIGEST"
-                doctl registry repository delete-manifest cicdrych/htmx-spring-boot --digest "$DIGEST" --force \
-                  || echo "Fout bij verwijderen van $DIGEST"
-              fi
-            done
-          else
-            echo "Geen oude images om te verwijderen!"
-          fi
+            # Verwijder oude images
+            for IMAGE in $OLD_IMAGES; do
+              echo "Verwijderen van image ID: $IMAGE"
+              doctl compute image delete $IMAGE --force
+            done 
 
       - name: Run DigitalOcean Garbage Collection
         env:
