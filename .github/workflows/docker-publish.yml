@@ -111,6 +111,11 @@ jobs:
             chmod +x kubectl
             sudo mv kubectl /usr/local/bin/kubectl
           fi
+          
+      - name: Install Podman
+        run: |
+          sudo apt update
+          sudo apt install -y podman 
 
       - name: Install doctl (via snap)
         run: |
@@ -136,7 +141,7 @@ jobs:
           echo "Authenticeren bij DigitalOcean..."
           doctl auth init --access-token "$DIGITALOCEAN_ACCESS_TOKEN"
           doctl account get || echo "ERROR: Authenticatie is mislukt!"
-          echo "doctl is succesvol geauthenticeerd!"      
+          echo "doctl is succesvol geauthenticeerd!" 
 
       - name: Configure Kubernetes
         run: |
@@ -145,6 +150,25 @@ jobs:
             sudo snap connect doctl:kube-config
           fi
           doctl kubernetes cluster kubeconfig save k8s-1-32-1-do-0-ams3-1740567483244
+
+      - name: Podman login to DigitalOcean Registry
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          DIGITALOCEAN_USERNAME: ${{ secrets.DIGITALOCEAN_USERNAME }}
+        run: |
+          podman login registry.digitalocean.com -u "$DIGITALOCEAN_USERNAME" -p "$DIGITALOCEAN_ACCESS_TOKEN"
+
+      - name: Update Kubernetes Secret with Podman Credentials
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          DIGITALOCEAN_USERNAME: ${{ secrets.DIGITALOCEAN_USERNAME }}
+        run: |
+          kubectl delete secret registry-cicdrych -n default --ignore-not-found
+          kubectl create secret docker-registry registry-cicdrych \
+            --docker-server=registry.digitalocean.com \
+            --docker-username="$DIGITALOCEAN_USERNAME" \
+            --docker-password="$DIGITALOCEAN_ACCESS_TOKEN" \
+            --namespace=default    
 
       - name: Update Deployment YAML met Image Tag
         run: |
