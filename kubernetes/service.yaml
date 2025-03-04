@@ -6,7 +6,7 @@ metadata:
   annotations:
     service.beta.kubernetes.io/do-loadbalancer-size-slug: "lb-small"  # Specifiek voor DigitalOcean
 spec:
-  type: LoadBalancer  # Zorgt voor extern IP-adres
+  type: LoadBalancer
   selector:
     app: htmx-spring-boot  # Moet exact overeenkomen met de Deployment labels
   ports:

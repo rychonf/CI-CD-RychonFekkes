@@ -107,7 +107,7 @@ jobs:
   # Job 2: Deploy naar Kubernetes
   deploy:
     runs-on: ubuntu-latest
-    needs: build  # Zorgt ervoor dat de deploy job alleen draait als de build job slaagt
+    needs: build
 
     steps:
       - name: Checkout code
