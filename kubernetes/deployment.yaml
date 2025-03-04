@@ -14,7 +14,7 @@ spec:
         app: htmx-spring-boot
     spec:
       imagePullSecrets:
-        - name: digitalocean-registry-secret
+        - name: registry-cicdrych
       containers:
         - name: htmx-spring-boot
           image: registry.digitalocean.com/cicdrych/htmx-spring-boot:SHA_PLACEHOLDER
