@@ -50,23 +50,32 @@ jobs:
       - name: Define image tag
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
-      - name: Haal de lijst met images op en verwijder oude
+      - name: Haal de lijst met manifests op en verwijder oude images
         run: |
-            # Haal alle privé-images op en sorteer op created_at datum
-            IMAGES=$(doctl compute image list-user --format ID,Created --no-header | sort -k2,2 -r)
-
-            # Pak alle image ID's behalve de nieuwste (eerste)
-            OLD_IMAGES=$(echo "$IMAGES" | tail -n +2 | awk '{print $1}')
-
-            # Verwijder oude images
+            echo "Ophalen van alle image manifests..."
+            ALL_IMAGES=$(doctl registry repository list-manifests htmx-spring-boot --output json)
+            
+            echo "Alle images in de repository (gesorteerd op push-tijd):"
+            echo "$ALL_IMAGES" | jq -r '.[] | "\(.digest) - \(.pushed_at)"'
+            
+            OLD_IMAGES=$(echo "$ALL_IMAGES" | jq -r 'sort_by(.pushed_at) | .[0:-1] | .[].digest')
+            
+            if [ -z "$OLD_IMAGES" ]; then
+                echo "Geen oude images om te verwijderen. Exiting..."
+                exit 0
+            fi
+            
+            echo "🗑️ De volgende images worden verwijderd:"
+            echo "$OLD_IMAGES"
+            
             for IMAGE in $OLD_IMAGES; do
-              echo "Verwijderen van image ID: $IMAGE"
-              doctl compute image delete $IMAGE --force
-            done 
+                echo "Verwijderen van image: $IMAGE"
+                doctl registry repository delete-manifest htmx-spring-boot $IMAGE --force
+            done
+            
+            echo "Opruimen voltooid!"
 
       - name: Run DigitalOcean Garbage Collection
-        env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
         run: |
           echo "Starten van DigitalOcean Garbage Collection..."
           doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."      
