@@ -230,5 +230,5 @@ jobs:
 
           FULL_URL="http://$APP_URL"
 
-          echo "Application is beschikbaar op: $FULL_URL"
-          echo "::notice title=Application URL::[Klik hier om naar de applicatie te navigeren]($FULL_URL)"
+          echo "Applicatie is beschikbaar op: $FULL_URL"
+          echo "::notice title=Applicatie URL URL::($FULL_URL)"
