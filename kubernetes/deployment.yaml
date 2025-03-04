@@ -5,8 +5,9 @@ metadata:
   namespace: default
 spec:
   replicas: 2
+  revisionHistoryLimit: 2  # Beperk het aantal oude ReplicaSets tot 2
   strategy:
-    type: RollingUpdate  # Rolling updates inschakelen
+    type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0  # Houd altijd een pod beschikbaar
       maxSurge: 1        # Sta toe dat er tijdelijk 1 extra pod draait tijdens de update
@@ -26,10 +27,10 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 1010
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "100Mi"
-            limits:
-              cpu: "250m"
-              memory: "500Mi"
+#          resources:
+#            requests:
+#              cpu: "100m"
+#              memory: "100Mi"
+#            limits:
+#              cpu: "250m"
+#              memory: "500Mi"
