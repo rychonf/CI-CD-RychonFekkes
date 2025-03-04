@@ -8,7 +8,6 @@ on:
     branches:
       - main
 jobs:
-  # Job 1: Build en Push naar DigitalOcean Registers
   build:
     runs-on: ubuntu-latest
 
@@ -16,33 +15,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Podman if not already installed
+      - name: Installeer Podman indien dit nog niet is gebeurd
         run: |
           if ! command -v podman &> /dev/null; then
             sudo apt-get update
             sudo apt-get install -y podman
           else
-            echo "Podman is already installed"
+            echo "Podman is al succesvol geïnstalleerd"
           fi
 
-      - name: Install doctl if not already installed
+      - name: Installeer Digital Ocean command line via Snapd indien dit nog niet is gebeurd
         run: |
           if ! command -v snap &> /dev/null; then
-            echo "Installing Snapd..."
+            echo "Installeren van Snapd..."
             sudo apt update
             sudo apt install -y snapd
           else
-            echo "Snapd is already installed"
+            echo "Snapd is al succesvol geïnstalleerd"
           fi
 
           if ! snap list | grep -q doctl; then
-            echo "Installing doctl..."
+            echo "Installeren van doctl..."
             sudo snap install doctl
           else
-            echo "doctl is already installed"
+            echo "doctl is al succesvol geïnstalleerd"
           fi
 
-      - name: Debug doctl installatie
+      - name: Extra controle op de doctl installatie
         run: |
           echo "Controleren of doctl correct is geïnstalleerd..."
           if command -v doctl &> /dev/null; then
@@ -53,7 +52,7 @@ jobs:
             exit 1
           fi
 
-      - name: Authenticate DigitalOcean CLI (doctl)
+      - name: Authenticate van de Digital Ocean Command line (doctl)
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
         run: |
@@ -62,7 +61,7 @@ jobs:
           doctl account get || echo "ERROR: Authenticatie is mislukt!"
           echo "doctl is succesvol geauthenticeerd!"
 
-      - name: Define image tag
+      - name: de sha in een Image tag variabele stoppen voor beter versie beheer
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Haal de lijst met manifests op en verwijder oude images
@@ -90,16 +89,16 @@ jobs:
             
             echo "Opruimen voltooid!"
 
-      - name: Run DigitalOcean Garbage Collection
+      - name: Leeg de Digital Ocean Garbage Collection
         run: |
           echo "Starten van DigitalOcean Garbage Collection..."
           doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."      
 
-      - name: Build Docker image with Podman (Optimized)
+      - name: Bouw de Docker image met Podman
         run: |
           podman build --squash -t registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }} .
 
-      - name: Push Docker image to DigitalOcean Container Registry
+      - name: Push Docker image naar de gewenste DigitalOcean Container Registry
         run: |
           podman login registry.digitalocean.com -u ${{ secrets.DIGITALOCEAN_USERNAME }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           podman push registry.digitalocean.com/cicdrych/htmx-spring-boot:${{ env.IMAGE_TAG }}
@@ -113,7 +112,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install kubectl
+      - name: Installeren van de kubernetes command line indien dit nog niet is gebeurd
         run: |
           if kubectl version --client &> /dev/null; then
             echo "Kubectl is al geïnstalleerd."
@@ -124,33 +123,33 @@ jobs:
             sudo mv kubectl /usr/local/bin/kubectl
           fi
           
-      - name: Install Podman if not already installed
+      - name: Installeer Podman indien dit nog niet is gebeurd
         run: |
           if ! command -v podman &> /dev/null; then
             sudo apt-get update
             sudo apt-get install -y podman
           else
-            echo "Podman is already installed"
-          fi 
+            echo "Podman is al succesvol geïnstalleerd"
+          fi
 
-      - name: Install doctl if not already installed
+      - name: Installeer Digital Ocean command line via Snapd indien dit nog niet is gebeurd
         run: |
           if ! command -v snap &> /dev/null; then
-            echo "Installing Snapd..."
+            echo "Installeren van Snapd..."
             sudo apt update
             sudo apt install -y snapd
           else
-            echo "Snapd is already installed"
+            echo "Snapd is al succesvol geïnstalleerd"
           fi
 
           if ! snap list | grep -q doctl; then
-            echo "Installing doctl..."
+            echo "Installeren van doctl..."
             sudo snap install doctl
           else
-            echo "doctl is already installed"
+            echo "doctl is al succesvol geïnstalleerd"
           fi
 
-      - name: Debug doctl installatie
+      - name: Extra controle op doctl installatie
         run: |
           echo "Controleren of doctl correct is geïnstalleerd..."
           if command -v doctl &> /dev/null; then
@@ -161,7 +160,7 @@ jobs:
             exit 1
           fi
 
-      - name: Authenticate DigitalOcean CLI (doctl)
+      - name: Authenticate Digital Ocean CLI (doctl)
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
         run: |
@@ -170,7 +169,7 @@ jobs:
           doctl account get || echo "ERROR: Authenticatie is mislukt!"
           echo "doctl is succesvol geauthenticeerd!" 
 
-      - name: Configure Kubernetes
+      - name: Configuratie van Kubernetes
         run: |
           mkdir -p ~/.kube && chmod 700 ~/.kube
           if command -v snap &> /dev/null && snap list doctl &> /dev/null; then
@@ -178,14 +177,14 @@ jobs:
           fi
           doctl kubernetes cluster kubeconfig save k8s-1-32-1-do-0-ams3-1740567483244
 
-      - name: Podman login to DigitalOcean Registry
+      - name: Podman login op de Digital Ocean Registry
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           DIGITALOCEAN_USERNAME: ${{ secrets.DIGITALOCEAN_USERNAME }}
         run: |
           podman login registry.digitalocean.com -u "$DIGITALOCEAN_USERNAME" -p "$DIGITALOCEAN_ACCESS_TOKEN"
 
-      - name: Update Kubernetes Secret with Podman Credentials
+      - name: Update Kubernetes Secret met de Podman credentials
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           DIGITALOCEAN_USERNAME: ${{ secrets.DIGITALOCEAN_USERNAME }}
@@ -197,15 +196,15 @@ jobs:
             --docker-password="$DIGITALOCEAN_ACCESS_TOKEN" \
             --namespace=default    
 
-      - name: Update Deployment YAML met Image Tag
+      - name: Update de Deployment YAML met een sha placeholder (image tag)
         run: |
           SHA_PLACEHOLDER="${{ github.sha }}"
           sed -i "s|image: registry.digitalocean.com/cicdrych/htmx-spring-boot:.*|image: registry.digitalocean.com/cicdrych/htmx-spring-boot:$SHA_PLACEHOLDER|g" kubernetes/deployment.yaml
 
-      - name: Debug Deployment YAML
+      - name: Log de Deployment YAML om te zien of de configuratie goed staat
         run: cat kubernetes/deployment.yaml
 
-      - name: Deploy to Kubernetes
+      - name: Deployen naar Kubernetes
         run: |
           kubectl apply -f kubernetes/deployment.yaml
           kubectl rollout restart deployment/htmx-spring-boot

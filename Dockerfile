@@ -1,4 +1,4 @@
-# Stage 1: Bouwt de Spring Boot applicatie
+# Stage 1: Bouw de Spring Boot applicatie
 FROM maven:3.8.4-eclipse-temurin-17 AS builder
 
 # Set de working directory
@@ -14,34 +14,34 @@ COPY pom.xml mvnw ./
 # Kopieert de map waar de maven wrapper zich bevind
 COPY .mvn .mvn
 
-# Download dependencies before copying source code to leverage Docker caching
+# Download de depencies voordat de broncode wordt gekopieert (caching)
 RUN mvn dependency:go-offline
 
 # Kopieert de broncode van de applicatie
 COPY src ./src
 
-# Build the Spring Boot application
+# Bouwt de springboot applicatie
 RUN mvn clean package -DskipTests
 
-# Stage 2: Create a minimal runtime environment
+# Stage 2: maak een minimale runtime omgeving
 FROM eclipse-temurin:17-jre-alpine
 
-# Set working directory
+# Zet de werkmap
 WORKDIR /app
 
-# Copy the built JAR from the builder stage
+# Kopieert de bouw JAR vanuit de bouwfase
 COPY --from=builder /app/target/*.jar app.jar
 
 # Zorg ervoor dat de logs directory bestaat en rechten juist zijn ingesteld
 RUN mkdir -p /app/logs && chmod -R 777 /app/logs
 
- #Systeempakketten installeren en opruimen (LibSSL3 en curl)
+#Systeempakketten installeren en opruimen (LibSSL3 en curl)
 RUN apk update && apk add --no-cache \
     libssl3 curl ca-certificates
 
-# Expose applicatie poort
+# Expose de applicatie poort voor betere beveiliging
 EXPOSE 1010
 ENV SERVER_PORT=1010
 
-# Run the application
+# Run de applicatie
 CMD ["java", "-jar", "app.jar", "--logging.file.name=/app/logs/app.log"]
