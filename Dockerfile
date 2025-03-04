@@ -33,11 +33,11 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
 # Omgevingsvariabelen instellen voor databaseconfiguratie en logging
-ENV SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/mydatabase \
-    SPRING_DATASOURCE_USERNAME=root \
-    SPRING_DATASOURCE_PASSWORD=securepassword \
-    LOGGING_LEVEL_ROOT=INFO \
-    LOGGING_FILE_NAME=/app/logs/app.log
+#ENV SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/mydatabase \
+#    SPRING_DATASOURCE_USERNAME=root \
+#    SPRING_DATASOURCE_PASSWORD=securepassword \
+#    LOGGING_LEVEL_ROOT=INFO \
+#    LOGGING_FILE_NAME=/app/logs/app.log
 
 # Zorg ervoor dat de logs directory bestaat en rechten juist zijn ingesteld
 RUN mkdir -p /app/logs && chmod -R 777 /app/logs
