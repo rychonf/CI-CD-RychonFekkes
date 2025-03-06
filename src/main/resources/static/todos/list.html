@@ -9,7 +9,7 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-6 offset-lg-3">
-        <h1>Wat moet er nog gedaan worden?</h1>
+        <h1>To Do's</h1>
 
         <div th:each="toDo : ${toDos}">
           <div th:replace="~{todos/show :: showToDo(toDo=${toDo})}"></div>
@@ -18,7 +18,7 @@
         <div id="new-todo"></div>
 
         <form hx-get="/todos/new" hx-swap="outerHTML" hx-target="#new-todo">
-          <button class="btn btn-primary my-3" type="submit">Nieuwe te doen knop</button>
+          <button class="btn btn-primary my-3" type="submit">te doen</button>
         </form>
       </div>
     </div>
