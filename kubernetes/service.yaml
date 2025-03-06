@@ -11,5 +11,5 @@ spec:
     app: htmx-spring-boot  # Moet exact overeenkomen met de Deployment labels
   ports:
     - protocol: TCP
-      port: 80         # Externe poort (waar gebruikers toegang krijgen)
+      port: 80         # Externe poort
       targetPort: 1010  # Poort binnen de container (zoals gedefinieerd in deployment.yaml)
