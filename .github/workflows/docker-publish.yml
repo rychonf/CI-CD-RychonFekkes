@@ -204,7 +204,7 @@ jobs:
       - name: Deployen naar Kubernetes
         run: |
           kubectl apply -f kubernetes/deployment.yaml
-          kubectl rollout restart deployment/htmx-spring-boot
+#          kubectl rollout restart deployment/htmx-spring-boot
 
       - name: De URL om naar de applicatie te navigeren
         run: |
@@ -218,4 +218,7 @@ jobs:
 
           FULL_URL="http://$APP_URL"
 
-          echo "Applicatie is beschikbaar op: $FULL_URL"
+          echo "De applicatie is nu bereikbaar op:"
+          echo "$FULL_URL"
+          echo "APPLICATION_URL=$FULL_URL" >> $GITHUB_ENV
+          echo "[Open de applicatie hier]($APPLICATION_URL)" >> $GITHUB_STEP_SUMMARY
