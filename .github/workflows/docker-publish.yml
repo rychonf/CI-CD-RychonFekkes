@@ -221,5 +221,4 @@ jobs:
           echo "De applicatie is nu bereikbaar op:"
           echo "$FULL_URL"
           echo "APPLICATION_URL=$FULL_URL" >> $GITHUB_ENV
-          echo "[Klik hier om naar de applicatie te navigeren]($FULL_URL)"
-#          >> $GITHUB_STEP_SUMMARY
+          echo "[Klik hier om naar de applicatie te navigeren]($FULL_URL)" >> $GITHUB_STEP_SUMMARY
