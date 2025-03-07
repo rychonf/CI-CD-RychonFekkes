@@ -30,6 +30,7 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Kopieert de bouw JAR vanuit de bouwfase
+COPY --from=builder /app/target/*.jar app.jar
 COPY --from=builder /app/target/htmx-spring-boot.jar app.jar
 
 # Zorg ervoor dat de logs directory bestaat en rechten juist zijn ingesteld
@@ -45,3 +46,4 @@ ENV SERVER_PORT=1010
 
 # Run de appliatie en voorkom caching van statische bestanden
 CMD ["java", "-Dspring.web.resources.cache.period=0", "-jar", "app.jar", "--logging.file.name=/app/logs/app.log"]
+CMD ["java", "-jar", "app.jar", "--logging.file.name=/app/logs/app.log"]
