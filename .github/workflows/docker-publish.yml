@@ -23,22 +23,35 @@ jobs:
             echo "Podman is al succesvol geïnstalleerd"
           fi
 
-      - name: Installeer Digital Ocean command line via Snapd indien dit nog niet is gebeurd
-        run: |
-          if ! command -v snap &> /dev/null; then
-            echo "Installeren van Snapd..."
-            sudo apt update
-            sudo apt install -y snapd
-          else
-            echo "Snapd is al succesvol geïnstalleerd"
-          fi
+#      - name: Installeer Digital Ocean command line via Snapd indien dit nog niet is gebeurd
+#        run: |
+#          if ! command -v snap &> /dev/null; then
+#            echo "Installeren van Snapd..."
+#            sudo apt update
+#            sudo apt install -y snapd
+#          else
+#            echo "Snapd is al succesvol geïnstalleerd"
+#          fi
+#
+#          if ! snap list | grep -q doctl; then
+#            echo "Installeren van doctl..."
+#            sudo snap install doctl
+#          else
+#            echo "doctl is al succesvol geïnstalleerd"
+#          fi
 
-          if ! snap list | grep -q doctl; then
-            echo "Installeren van doctl..."
-            sudo snap install doctl
+      - name: Installeer DigitalOcean CLI (doctl) zonder Snap
+        run: |
+          if ! command -v doctl &> /dev/null; then
+            echo "doctl niet gevonden, installeren..."
+            LATEST_VERSION=$(curl -sL https://api.github.com/repos/digitalocean/doctl/releases/latest | jq -r ".tag_name" | tr -d 'v')
+            curl -sL "https://github.com/digitalocean/doctl/releases/download/v${LATEST_VERSION}/doctl-${LATEST_VERSION}-linux-amd64.tar.gz" | tar -xz
+            sudo mv doctl /usr/local/bin
+            echo "doctl succesvol geïnstalleerd!"
           else
-            echo "doctl is al succesvol geïnstalleerd"
+            echo "doctl is al geïnstalleerd, overslaan."
           fi
+        shell: bash
 
       - name: Extra controle op de doctl installatie
         run: |
@@ -88,10 +101,10 @@ jobs:
 #
 #            echo "Opruimen voltooid!"
 
-#      - name: Leeg de Digital Ocean Garbage Collection
-#        run: |
-#          echo "Starten van DigitalOcean Garbage Collection..."
-#          doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."
+      - name: Leeg de Digital Ocean Garbage Collection
+        run: |
+          echo "Starten van DigitalOcean Garbage Collection..."
+          doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."
 
       - name: Bouw de Docker image met Podman
         run: |
@@ -204,7 +217,7 @@ jobs:
       - name: Deployen naar Kubernetes
         run: |
           kubectl apply -f kubernetes/deployment.yaml
-#          kubectl rollout restart deployment/htmx-spring-boot
+          kubectl rollout restart deployment/htmx-spring-boot
 
       - name: De URL om naar de applicatie te navigeren
         run: |
