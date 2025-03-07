@@ -46,4 +46,3 @@ ENV SERVER_PORT=1010
 
 # Run de appliatie en voorkom caching van statische bestanden
 CMD ["java", "-Dspring.web.resources.cache.period=0", "-jar", "app.jar", "--logging.file.name=/app/logs/app.log"]
-#CMD ["java", "-jar", "app.jar", "--logging.file.name=/app/logs/app.log"]
