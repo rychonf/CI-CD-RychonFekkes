@@ -9,8 +9,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 0  # Houd altijd een pod beschikbaar
       maxSurge: 1        # Sta toe dat er tijdelijk 1 extra pod draait tijdens de update
+      maxUnavailable: 0  # Houd altijd een pod beschikbaar
   selector:
     matchLabels:
       app: htmx-spring-boot
