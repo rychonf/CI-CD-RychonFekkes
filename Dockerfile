@@ -30,7 +30,6 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Kopieert de bouw JAR vanuit de bouwfase
-#COPY --from=builder /app/target/*.jar app.jar
 COPY --from=builder /app/target/htmx-spring-boot.jar app.jar
 
 # Zorg ervoor dat de logs directory bestaat en rechten juist zijn ingesteld
