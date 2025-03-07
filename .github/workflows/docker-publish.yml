@@ -40,7 +40,7 @@ jobs:
 #            echo "doctl is al succesvol geïnstalleerd"
 #          fi
 
-      - name: Installeer DigitalOcean CLI (doctl) zonder Snap
+      - name: Installeer DigitalOcean CLI (doctl)
         run: |
           if ! command -v doctl &> /dev/null; then
             echo "doctl niet gevonden, installeren..."
@@ -142,22 +142,18 @@ jobs:
             echo "Podman is al succesvol geïnstalleerd"
           fi
 
-      - name: Installeer Digital Ocean command line via Snapd indien dit nog niet is gebeurd
+      - name: Installeer DigitalOcean CLI (doctl)
         run: |
-          if ! command -v snap &> /dev/null; then
-            echo "Installeren van Snapd..."
-            sudo apt update
-            sudo apt install -y snapd
+          if ! command -v doctl &> /dev/null; then
+            echo "doctl niet gevonden, installeren..."
+            LATEST_VERSION=$(curl -sL https://api.github.com/repos/digitalocean/doctl/releases/latest | jq -r ".tag_name" | tr -d 'v')
+            curl -sL "https://github.com/digitalocean/doctl/releases/download/v${LATEST_VERSION}/doctl-${LATEST_VERSION}-linux-amd64.tar.gz" | tar -xz
+            sudo mv doctl /usr/local/bin
+            echo "doctl succesvol geïnstalleerd!"
           else
-            echo "Snapd is al succesvol geïnstalleerd"
+            echo "doctl is al geïnstalleerd, overslaan."
           fi
-
-          if ! snap list | grep -q doctl; then
-            echo "Installeren van doctl..."
-            sudo snap install doctl
-          else
-            echo "doctl is al succesvol geïnstalleerd"
-          fi
+        shell: bash
 
       - name: Extra controle op doctl installatie
         run: |
