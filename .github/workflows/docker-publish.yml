@@ -59,35 +59,35 @@ jobs:
       - name: de sha in een Image tag variabele stoppen voor beter versie beheer
         run: echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
-#      - name: Haal de lijst met manifests op en verwijder oude images
-#        run: |
-#            echo "Ophalen van alle image manifests..."
-#            ALL_IMAGES=$(doctl registry repository list-manifests htmx-spring-boot --output json)
-#
-#            echo "Alle images in de repository (gesorteerd op push-tijd):"
-#            echo "$ALL_IMAGES" | jq -r '.[] | "\(.digest) - \(.pushed_at)"'
-#
-#            OLD_IMAGES=$(echo "$ALL_IMAGES" | jq -r 'sort_by(.pushed_at) | .[0:-1] | .[].digest')
-#
-#            if [ -z "$OLD_IMAGES" ]; then
-#                echo "Geen oude images om te verwijderen. Exiting..."
-#                exit 0
-#            fi
-#
-#            echo "De volgende images worden verwijderd:"
-#            echo "$OLD_IMAGES"
-#
-#            for IMAGE in $OLD_IMAGES; do
-#                echo "Verwijderen van image: $IMAGE"
-#                doctl registry repository delete-manifest htmx-spring-boot $IMAGE --force
-#            done
-#
-#            echo "Opruimen voltooid!"
-#
-#      - name: Leeg de Digital Ocean Garbage Collection
-#        run: |
-#          echo "Starten van DigitalOcean Garbage Collection..."
-#          doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."
+      - name: Haal de lijst met manifests op en verwijder oude images
+        run: |
+            echo "Ophalen van alle image manifests..."
+            ALL_IMAGES=$(doctl registry repository list-manifests htmx-spring-boot --output json)
+
+            echo "Alle images in de repository (gesorteerd op push-tijd):"
+            echo "$ALL_IMAGES" | jq -r '.[] | "\(.digest) - \(.pushed_at)"'
+
+            OLD_IMAGES=$(echo "$ALL_IMAGES" | jq -r 'sort_by(.pushed_at) | .[0:-1] | .[].digest')
+
+            if [ -z "$OLD_IMAGES" ]; then
+                echo "Geen oude images om te verwijderen. Exiting..."
+                exit 0
+            fi
+
+            echo "De volgende images worden verwijderd:"
+            echo "$OLD_IMAGES"
+
+            for IMAGE in $OLD_IMAGES; do
+                echo "Verwijderen van image: $IMAGE"
+                doctl registry repository delete-manifest htmx-spring-boot $IMAGE --force
+            done
+
+            echo "Opruimen voltooid!"
+
+      - name: Leeg de Digital Ocean Garbage Collection
+        run: |
+          echo "Starten van DigitalOcean Garbage Collection..."
+          doctl registry garbage-collection start --force || echo "Garbage Collection kan niet worden uitgevoerd."
 
       - name: Bouw de Docker image met Podman
         run: |
