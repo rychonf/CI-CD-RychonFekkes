@@ -4,7 +4,7 @@ metadata:
   name: htmx-spring-boot
   namespace: default
 spec:
-  replicas: 1
+  replicas: 2
   revisionHistoryLimit: 2
   strategy:
     type: RollingUpdate
@@ -30,7 +30,7 @@ spec:
           resources:
             requests:
               memory: "256Mi"
-              cpu: "200m"
+              cpu: "5m"
             limits:
               memory: "512Mi"
-              cpu: "500m"
+              cpu: "50m"
