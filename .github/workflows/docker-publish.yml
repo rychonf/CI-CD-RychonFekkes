@@ -23,23 +23,6 @@ jobs:
             echo "Podman is al succesvol geïnstalleerd"
           fi
 
-#      - name: Installeer Digital Ocean command line via Snapd indien dit nog niet is gebeurd
-#        run: |
-#          if ! command -v snap &> /dev/null; then
-#            echo "Installeren van Snapd..."
-#            sudo apt update
-#            sudo apt install -y snapd
-#          else
-#            echo "Snapd is al succesvol geïnstalleerd"
-#          fi
-#
-#          if ! snap list | grep -q doctl; then
-#            echo "Installeren van doctl..."
-#            sudo snap install doctl
-#          else
-#            echo "doctl is al succesvol geïnstalleerd"
-#          fi
-
       - name: Installeer DigitalOcean CLI (doctl)
         run: |
           if ! command -v doctl &> /dev/null; then
