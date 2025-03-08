@@ -133,38 +133,38 @@ jobs:
             sudo mv kubectl /usr/local/bin/kubectl
           fi
           
-      - name: Installeer Podman indien dit nog niet is gebeurd
-        run: |
-          if ! command -v podman &> /dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y podman
-          else
-            echo "Podman is al succesvol geïnstalleerd"
-          fi
-
-      - name: Installeer DigitalOcean CLI (doctl)
-        run: |
-          if ! command -v doctl &> /dev/null; then
-            echo "doctl niet gevonden, installeren..."
-            LATEST_VERSION=$(curl -sL https://api.github.com/repos/digitalocean/doctl/releases/latest | jq -r ".tag_name" | tr -d 'v')
-            curl -sL "https://github.com/digitalocean/doctl/releases/download/v${LATEST_VERSION}/doctl-${LATEST_VERSION}-linux-amd64.tar.gz" | tar -xz
-            sudo mv doctl /usr/local/bin
-            echo "doctl succesvol geïnstalleerd!"
-          else
-            echo "doctl is al geïnstalleerd, overslaan."
-          fi
-        shell: bash
-
-      - name: Extra controle op doctl installatie
-        run: |
-          echo "Controleren of doctl correct is geïnstalleerd..."
-          if command -v doctl &> /dev/null; then
-            echo "doctl gevonden op $(which doctl)"
-            doctl version
-          else
-            echo "ERROR: doctl is nog steeds niet geïnstalleerd!"
-            exit 1
-          fi
+#      - name: Installeer Podman indien dit nog niet is gebeurd
+#        run: |
+#          if ! command -v podman &> /dev/null; then
+#            sudo apt-get update
+#            sudo apt-get install -y podman
+#          else
+#            echo "Podman is al succesvol geïnstalleerd"
+#          fi
+#
+#      - name: Installeer DigitalOcean CLI (doctl)
+#        run: |
+#          if ! command -v doctl &> /dev/null; then
+#            echo "doctl niet gevonden, installeren..."
+#            LATEST_VERSION=$(curl -sL https://api.github.com/repos/digitalocean/doctl/releases/latest | jq -r ".tag_name" | tr -d 'v')
+#            curl -sL "https://github.com/digitalocean/doctl/releases/download/v${LATEST_VERSION}/doctl-${LATEST_VERSION}-linux-amd64.tar.gz" | tar -xz
+#            sudo mv doctl /usr/local/bin
+#            echo "doctl succesvol geïnstalleerd!"
+#          else
+#            echo "doctl is al geïnstalleerd, overslaan."
+#          fi
+#        shell: bash
+#
+#      - name: Extra controle op doctl installatie
+#        run: |
+#          echo "Controleren of doctl correct is geïnstalleerd..."
+#          if command -v doctl &> /dev/null; then
+#            echo "doctl gevonden op $(which doctl)"
+#            doctl version
+#          else
+#            echo "ERROR: doctl is nog steeds niet geïnstalleerd!"
+#            exit 1
+#          fi
 
       - name: Authenticate Digital Ocean CLI (doctl)
         env:
